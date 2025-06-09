@@ -1,161 +1,269 @@
-# Verus Mining Setup Guide for RK3588/RK3588S ARM64 Devices
+# Verus Mining Setup Guide for ARM64 Devices
 
-Complete guide to set up Verus (VRSC) mining on ARM64 single board computers with Rockchip RK3588/RK3588S chips using Ubuntu.
+Complete step-by-step guide to set up Verus (VRSC) cryptocurrency mining on ARM64 single board computers with Rockchip RK3588/RK3588S chips.
+
+## Table of Contents
+
+1. [What You Need](#what-you-need)
+2. [Compatible Devices](#compatible-devices)
+3. [Download Ubuntu Image](#download-ubuntu-image)
+4. [Install Ubuntu](#install-ubuntu)
+5. [Initial System Setup](#initial-system-setup)
+6. [Install Mining Software](#install-mining-software)
+7. [Configure Your Miner](#configure-your-miner)
+8. [Test Your Miner](#test-your-miner)
+9. [Setup Auto-Start](#setup-auto-start)
+10. [Monitoring Your Miner](#monitoring-your-miner)
+11. [Troubleshooting](#troubleshooting)
+12. [Useful Commands](#useful-commands)
+
+---
+
+## What You Need
+
+Before starting, make sure you have:
+
+### Hardware Requirements
+- **ARM64 device** with RK3588/RK3588S chipset
+- **RAM**: Minimum 4GB (8GB+ recommended)
+- **Storage**: MicroSD card 32GB or larger
+- **Power Supply**: Quality 5V/3A adapter (very important!)
+- **Network**: Ethernet cable or WiFi
+- **Cooling**: Heatsink recommended
+
+### Software Requirements
+- Computer to flash SD card
+- [Balena Etcher](https://www.balena.io/etcher/) for flashing
+- Your Verus wallet address
+- Mining pool of choice
+
+⚠️ **Important**: Use a quality power supply! Cheap adapters cause random reboots and mining failures.
+
+---
 
 ## Compatible Devices
 
-**Primary Focus**: Radxa Rock 5C (RK3588S2)
+This guide works with any ARM64 device using RK3588/RK3588S chipsets:
 
-**Also Compatible With**:
-- Radxa Rock 5A/5B (RK3588)
-- Orange Pi 5/5 Plus (RK3588S)
+**Radxa Rock Series:**
+- Rock 5A (RK3588)
+- Rock 5B (RK3588) 
+- Rock 5C (RK3588S2)
+
+**Orange Pi Series:**
+- Orange Pi 5 (RK3588S)
+- Orange Pi 5 Plus (RK3588)
+
+**Other Compatible Devices:**
 - Khadas Edge2 (RK3588S)
 - Firefly ROC-RK3588S-PC
 - Banana Pi BPI-M7 (RK3588)
 - Any ARM64 device with RK3588/RK3588S chipset
 
-## System Requirements
+---
 
-- **CPU**: Rockchip RK3588 or RK3588S (ARM64 architecture)
-- **RAM**: Minimum 4GB (8GB+ recommended for optimal performance)
-- **Storage**: MicroSD card (32GB+ recommended) or eMMC
-- **Power**: 5V/3A minimum (quality power supply crucial!)
-- **Network**: Ethernet or WiFi connection
-- **Architecture**: ARM64 (aarch64)
+## Download Ubuntu Image
 
+Download the Ubuntu image for your specific device:
 
+- **Radxa Rock 5C**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/rock-5c.html
+- **Radxa Rock 5A**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/rock-5a.html
+- **Radxa Rock 5B**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/rock-5b.html
+- **Orange Pi 5**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/orangepi-5.html
+- **Orange Pi 5 Plus**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/orangepi-5-plus.html
 
-## Step 1: Install Ubuntu
+💡 **Tip**: Download the latest stable version, not beta releases.
 
-### Download Ubuntu Images for RK3588/RK3588S Devices:
+---
 
-**Radxa Rock 5C**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/rock-5c.html  
-**Radxa Rock 5A**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/rock-5a.html  
-**Radxa Rock 5B**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/rock-5b.html  
-**Orange Pi 5**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/orangepi-5.html  
-**Orange Pi 5 Plus**: https://joshua-riek.github.io/ubuntu-rockchip-download/boards/orangepi-5-plus.html
+## Install Ubuntu
 
-### Installation Steps:
-1. Download appropriate Ubuntu image for your specific board
-2. Flash to microSD card using [Balena Etcher](https://www.balena.io/etcher/)
-3. Insert SD card into your device and boot
-4. Ensure your device has adequate cooling (heatsink recommended)
+### Step 1: Flash Ubuntu to SD Card
+1. Download and install [Balena Etcher](https://www.balena.io/etcher/)
+2. Insert your microSD card into your computer
+3. Open Balena Etcher
+4. Select the Ubuntu image file you downloaded
+5. Select your SD card
+6. Click "Flash" and wait for completion
 
-## Step 2: Initial Setup
+### Step 2: Boot Your Device
+1. Insert the SD card into your ARM64 device
+2. Connect ethernet cable (recommended) or setup WiFi later
+3. Connect power adapter
+4. Your device should boot to Ubuntu
 
-### Login to the system
-```bash
+⚠️ **First boot takes 2-3 minutes** - be patient!
+
+---
+
+## Initial System Setup
+
+### Step 1: Login to Ubuntu
+```
 Username: ubuntu
 Password: ubuntu
 ```
 
-### Change hostname (add your hostname)
+You'll be prompted to change the password on first login.
+
+### Step 2: Change Device Hostname
 ```bash
 sudo nano /etc/hostname
 ```
-Delete everything and type your preferred hostname.
+- Delete everything and type your preferred hostname
+- Press `Ctrl+X`, then `Y`, then `Enter` to save
 
-Press `Ctrl+X`, then `Y`, then `Enter`
-
-### Update hosts file
-**Note**: Use the same hostname you entered in the previous step.
+### Step 3: Update Hosts File
+**Important**: Use the same hostname you chose above.
 
 ```bash
 sudo nano /etc/hosts
 ```
-After the line `127.0.0.1 localhost`, add (with your chosen hostname):
+- After the line `127.0.0.1 localhost`, add a new line:
 ```
 127.0.1.1 your-hostname
 ```
-Press `Ctrl+X`, then `Y`, then `Enter`
+- Press `Ctrl+X`, then `Y`, then `Enter` to save
 
-### Update the system
+### Step 4: Update System
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
+This will take 5-10 minutes depending on your internet speed.
 
-### Install essential packages
+### Step 5: Install Essential Packages
 ```bash
 sudo apt install lm-sensors nano tmux htop build-essential tree unzip zip net-tools curl wget git -y
 ```
 
-### Configure and test sensors
+### Step 6: Setup Temperature Monitoring
 ```bash
 sudo sensors-detect
 ```
-Press `Enter` to accept defaults when prompted.
+- Press `Enter` to accept defaults when prompted
+- Answer "YES" to most questions
 
-Test sensors:
+Test temperature sensors:
 ```bash
 sensors
 ```
+You should see CPU temperature readings.
 
-### Reboot to apply hostname changes
+### Step 7: Reboot
 ```bash
 sudo reboot
 ```
+After reboot, your prompt should show your new hostname.
 
-## Step 3: Install Verus Miner
+---
 
-### Install miner using [Oink70's](https://github.com/Oink70/Android-Mining) automated script
+## Install Mining Software
+
+### Step 1: Download and Install Miner
+Run this command to automatically install the optimized Verus miner:
+
 ```bash
 curl -o- -k https://raw.githubusercontent.com/Oink70/Android-Mining/main/install.sh | bash
 ```
 
-### Navigate to ccminer directory
+This installs [Oink70's](https://github.com/Oink70/Android-Mining) optimized ccminer for ARM64 devices.
+
+⏳ **This takes 2-3 minutes** - the script will download and setup everything automatically.
+
+### Step 2: Navigate to Miner Directory
 ```bash
 cd ccminer/
 ```
 
-### Configure mining pool and wallet
+---
+
+## Configure Your Miner
+
+### Step 1: Choose Your Mining Pool
+Visit https://miningpoolstats.stream/veruscoin to choose a mining pool.
+
+Popular choices include:
+- Pool.veruscoin.io
+- Luckpool.net
+- Zergpool.com
+
+### Step 2: Edit Configuration
 ```bash
 nano config.json
 ```
 
-Edit the configuration file with your mining pool URL and wallet address. Configure the following parameters:
-- Pool URL and port
-- Your wallet address.Worker name (same line)
+Configure these parameters:
+- **Pool URL and port** (from your chosen pool)
+- **Your wallet address** (your Verus wallet address)
+- **Worker name** (any name to identify this miner)
 
+Example format:
+```
+your-wallet-address.worker-name
+```
 
-Choose your preferred pool from: https://miningpoolstats.stream/veruscoin
+Save with `Ctrl+X`, then `Y`, then `Enter`.
 
-Save with `Ctrl+X`, then `Y`, then `Enter`
+💡 **Tip**: If you don't have a Verus wallet yet, download one from https://verus.io
 
-## Step 4: Test Mining
+---
 
-### Start mining manually
+## Test Your Miner
+
+### Step 1: Start Mining
 ```bash
 ~/ccminer/start.sh
 ```
 
-### Check mining status
+### Step 2: Check Mining Status
 ```bash
 screen -x CCminer
 ```
 
-To detach from screen session: `Ctrl+A`, then `D`
+You should see:
+- Connection to your pool
+- Accepted shares
+- Hashrate information
 
-### Monitor system performance
+### Step 3: Monitor System Performance
+Open a new terminal session and run:
 ```bash
 htop
+```
+Check CPU usage (should be near 100%).
+
+```bash
 sensors
 ```
+Monitor temperature (should stay under 80°C).
 
-## Step 5: Setup Auto-Start on Boot
+### Step 4: Detach from Mining Session
+To leave the miner running and return to command prompt:
+- Press `Ctrl+A`, then `D`
 
-### Add auto-start to crontab
+The miner continues running in the background.
+
+---
+
+## Setup Auto-Start
+
+Make your miner start automatically when the device boots.
+
+### Step 1: Edit Crontab
 ```bash
 crontab -e
 ```
+- Choose option `1` (nano editor)
 
-Choose nano as editor (option 1), then add this line at the end:
+### Step 2: Add Auto-Start Command
+Add this line at the end of the file:
 ```
 @reboot ~/ccminer/start.sh
 ```
 
-Save with `Ctrl+X`, then `Y`, then `Enter`
+Save with `Ctrl+X`, then `Y`, then `Enter`.
 
-### Test auto-start
+### Step 3: Test Auto-Start
 ```bash
 sudo reboot
 ```
@@ -165,124 +273,117 @@ After reboot, check if mining started automatically:
 screen -x CCminer
 ```
 
-## Step 6: Monitoring and Management
+✅ **Success!** Your miner now starts automatically on boot.
 
-### Check mining status
+---
+
+## Monitoring Your Miner
+
+### Check Mining Status
 ```bash
 screen -x CCminer
 ```
 
-### Monitor system resources
+### Monitor System Resources
 ```bash
-htop
-sensors
+htop           # CPU and memory usage
+sensors        # Temperature monitoring
 ```
 
-### Check system temperature
-```bash
-sensors | grep temp
-```
-
-### View mining logs
+### Check Mining Logs
 ```bash
 tail -f ~/ccminer/ccminer.log
 ```
 
-### Restart mining if needed
+### View Temperature Only
 ```bash
-pkill ccminer
-~/ccminer/start.sh
+sensors | grep temp
 ```
+
+---
 
 ## Troubleshooting
 
-### Random reboots or crashes
-- **Check power supply**: Ensure you're using a quality 5V/3A power adapter
-- **Monitor temperature**: Run `sensors` to check CPU temperature
-- **Check for adequate cooling**: Ensure proper ventilation
+### Problem: Random Reboots or Crashes
 
-### Mining not starting on boot
-- Verify crontab entry: `crontab -l`
-- Check script permissions: `ls -la ~/ccminer/start.sh`
-- Make executable if needed: `chmod +x ~/ccminer/start.sh`
+**Solution**: Check power supply
+- Ensure you're using a quality 5V/3A power adapter
+- Try a different power cable
+- Monitor temperature with `sensors`
 
-### Low hashrate
-- Monitor CPU usage with `htop`
-- Check CPU frequency: `cat /proc/cpuinfo | grep MHz`
-- Adjust CPU governor for performance:
+### Problem: Mining Not Starting on Boot
+
+**Solution**: Check auto-start setup
+```bash
+crontab -l                    # Verify crontab entry exists
+ls -la ~/ccminer/start.sh     # Check script permissions
+chmod +x ~/ccminer/start.sh   # Make executable if needed
+```
+
+### Problem: Low Hashrate
+
+**Solution**: Optimize performance
 ```bash
 sudo apt install cpufrequtils
 sudo cpufreq-set -g performance
 ```
 
-### Screen session issues
-- List active sessions: `screen -ls`
-- Kill stuck sessions: `screen -X -S CCminer quit`
-- Create new session: `screen -S CCminer`
+### Problem: Screen Session Issues
+
+**Solution**: Manage screen sessions
+```bash
+screen -ls                    # List active sessions
+screen -X -S CCminer quit     # Kill stuck sessions
+screen -S CCminer             # Create new session
+```
+
+### Problem: High Temperature
+
+**Solution**: Improve cooling
+- Install heatsink on CPU
+- Ensure proper ventilation
+- Check that temperature stays under 80°C
+
+---
+
+## Useful Commands
+
+### System Information
+```bash
+uname -m                          # Verify ARM64 architecture
+lscpu | grep "Model name"         # Check CPU information
+free -h                           # Check RAM
+nproc                             # Check CPU cores
+ip addr show                      # Network information
+```
+
+### Mining Management
+```bash
+~/ccminer/start.sh                # Start mining
+pkill ccminer                     # Stop mining
+screen -x CCminer                 # Check mining status
+crontab -l                        # View auto-start settings
+crontab -e                        # Edit auto-start settings
+```
+
+### System Monitoring
+```bash
+htop                              # Real-time system monitor
+sensors                           # Temperature readings
+cat /proc/cpuinfo | grep MHz      # CPU frequency
+```
+
+---
 
 ## Hardware Specifications
 
 **Supported Chipsets**: RK3588, RK3588S, RK3588S2  
 **Architecture**: ARM64 (aarch64)  
-**CPU Cores**: 4x Cortex-A76 + 4x Cortex-A55 (big.LITTLE configuration)
+**CPU Configuration**: 4x Cortex-A76 + 4x Cortex-A55 (big.LITTLE)
 
-## Important Notes
+---
 
-- **Power Supply**: Use a quality 5V/3A (or higher) power adapter - insufficient power causes random reboots
-- **Cooling**: Install heatsinks and ensure proper ventilation - RK3588/RK3588S chips generate significant heat
-- **RAM**: 4GB minimum, 8GB+ recommended for stable operation
-- **Network**: Stable internet connection required for pool mining
-- **Architecture**: This guide is specifically for ARM64 devices with RK3588/RK3588S chipsets
-- **Performance**: Hashrate varies significantly with cooling, power supply quality, and thermal management
-
-## Useful Commands
-
-### System monitoring
-```bash
-### Check CPU architecture and specs
-```bash
-# Verify ARM64 architecture
-uname -m
-
-# Check CPU information (should show RK3588/RK3588S)
-lscpu | grep "Model name"
-
-# Verify RAM (should be 4GB+)
-free -h
-
-# Check available CPU cores
-nproc
-```
-
-# Monitor real-time performance
-htop
-
-# Check temperatures
-sensors
-
-# Network status
-ip addr show
-```
-
-### Mining management
-```bash
-# Start mining
-~/ccminer/start.sh
-
-# Stop mining
-pkill ccminer
-
-# Check mining status
-screen -x CCminer
-
-# View crontab
-crontab -l
-
-# Edit crontab
-crontab -e
-```
-
-## Credits
+## Credits and Resources
 
 - **Ubuntu for Rockchip**: https://github.com/Joshua-Riek/ubuntu-rockchip
 - **Android Mining Tools**: https://github.com/Oink70/Android-Mining
